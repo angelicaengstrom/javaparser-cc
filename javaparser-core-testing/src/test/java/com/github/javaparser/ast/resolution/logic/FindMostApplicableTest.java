@@ -1,6 +1,6 @@
 package com.github.javaparser.ast.resolution.logic;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -13,6 +13,7 @@ import com.github.javaparser.resolution.model.SymbolReference;
 import com.github.javaparser.resolution.types.ResolvedType;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
 import com.github.javaparser.resolution.TypeSolver;
+import com.github.javaparser.resolution.UnsolvedSymbolException;
 
 public class FindMostApplicableTest extends MethodResolutionLogic {
     @Test
@@ -22,8 +23,8 @@ public class FindMostApplicableTest extends MethodResolutionLogic {
         TypeSolver typeSolver = new ReflectionTypeSolver();
 
         SymbolReference<ResolvedMethodDeclaration> applicableMethods = findMostApplicable(candidateSolvedMethods, "",
-                argumentsTypes, typeSolver);
+                argumentsTypes, typeSolver, false);
 
-        assertEquals(SymbolReference.unsolved(), applicableMethods);
+        assertThrows(UnsolvedSymbolException.class, () -> applicableMethods.getCorrespondingDeclaration());
     }
 }
