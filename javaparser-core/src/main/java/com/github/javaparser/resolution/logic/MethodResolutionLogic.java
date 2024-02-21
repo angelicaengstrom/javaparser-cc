@@ -653,16 +653,17 @@ public class MethodResolutionLogic {
     public static SymbolReference<ResolvedMethodDeclaration> findMostApplicable(List<ResolvedMethodDeclaration> methods,
             String name, List<ResolvedType> argumentsTypes, TypeSolver typeSolver) {
         SymbolReference<ResolvedMethodDeclaration> res = findMostApplicable(methods, name, argumentsTypes, typeSolver,
-                false);
+                false, new CCHelper(IntStream.range(1, 24).toArray()));
         if (res.isSolved()) {
             return res;
         }
-        return findMostApplicable(methods, name, argumentsTypes, typeSolver, true);
+        return findMostApplicable(methods, name, argumentsTypes, typeSolver, true,
+                new CCHelper(IntStream.range(1, 24).toArray()));
     }
 
     public static SymbolReference<ResolvedMethodDeclaration> findMostApplicable(List<ResolvedMethodDeclaration> methods,
-            String name, List<ResolvedType> argumentsTypes, TypeSolver typeSolver, boolean wildcardTolerance) {
-        CCHelper ch = new CCHelper(IntStream.range(1, 23).toArray());
+            String name, List<ResolvedType> argumentsTypes, TypeSolver typeSolver, boolean wildcardTolerance,
+            CCHelper ch) {
         // 1
         ch.call(1);
         List<ResolvedMethodDeclaration> applicableMethods = // Only consider methods with a matching name
@@ -676,7 +677,6 @@ public class MethodResolutionLogic {
         if (applicableMethods.isEmpty()) {
             // 2
             ch.call(2);
-            ch.printResult("findMostApplicable");
             return SymbolReference.unsolved();
         }
         // If there are multiple possible methods found, null arguments can help to
@@ -726,7 +726,6 @@ public class MethodResolutionLogic {
         if (applicableMethods.size() == 1) {
             // 11
             ch.call(11);
-            ch.printResult("findMostApplicable");
             return SymbolReference.solved(applicableMethods.get(0));
         }
         // Examine the applicable methods found, and evaluate each to determine the
@@ -793,13 +792,11 @@ public class MethodResolutionLogic {
                 } else {
                     // 23
                     ch.call(23);
-                    ch.printResult("findMostApplicable");
                     throw new MethodAmbiguityException("Ambiguous method call: cannot find a most applicable method: "
                             + winningCandidate + ", " + other);
                 }
             }
         }
-        ch.printResult("findMostApplicable");
         return SymbolReference.solved(winningCandidate);
     }
 
@@ -823,8 +820,8 @@ public class MethodResolutionLogic {
         return null;
     }
 
-
-    protected static boolean isMoreSpecific(ResolvedMethodDeclaration methodA, ResolvedMethodDeclaration methodB, List<ResolvedType> argumentTypes) {
+    protected static boolean isMoreSpecific(ResolvedMethodDeclaration methodA, ResolvedMethodDeclaration methodB,
+            List<ResolvedType> argumentTypes) {
         final boolean aVariadic = methodA.hasVariadicParameter();
         final boolean bVariadic = methodB.hasVariadicParameter();
         final int aNumberOfParams = methodA.getNumberOfParams();
