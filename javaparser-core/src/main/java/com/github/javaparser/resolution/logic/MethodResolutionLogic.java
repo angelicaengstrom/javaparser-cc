@@ -825,6 +825,9 @@ public class MethodResolutionLogic {
 
 
     protected static boolean isMoreSpecific(ResolvedMethodDeclaration methodA, ResolvedMethodDeclaration methodB, List<ResolvedType> argumentTypes) {
+        CCHelper ch = new CCHelper(IntStream.range(1, 17).toArray());
+        // 1
+        ch.call(1);
         final boolean aVariadic = methodA.hasVariadicParameter();
         final boolean bVariadic = methodB.hasVariadicParameter();
         final int aNumberOfParams = methodA.getNumberOfParams();
@@ -840,10 +843,14 @@ public class MethodResolutionLogic {
         // different amount of parameters).
         if (!aVariadic && aNumberOfParams == numberOfArgs
                 && (bVariadic && (bNumberOfParams != numberOfArgs || !isLastArgArray))) {
+            // 2
+            ch.call(2);
             return true;
         }
         if (!bVariadic && bNumberOfParams == numberOfArgs
                 && (aVariadic && (aNumberOfParams != numberOfArgs || !isLastArgArray))) {
+            // 3
+            ch.call(3);
             return false;
         }
         // If both methods are variadic but the calling method omits any varArgs, bump
@@ -852,6 +859,8 @@ public class MethodResolutionLogic {
         // specific
         if (aVariadic && bVariadic && aNumberOfParams == bNumberOfParams && numberOfArgs == aNumberOfParams - 1) {
             omittedArgs++;
+            // 4
+            ch.call(4);
         }
         // Either both methods are variadic or neither is. So we must compare the
         // parameter types.
@@ -859,7 +868,11 @@ public class MethodResolutionLogic {
             ResolvedType paramTypeA = getMethodsExplicitAndVariadicParameterType(methodA, i);
             ResolvedType paramTypeB = getMethodsExplicitAndVariadicParameterType(methodB, i);
             ResolvedType argType = null;
+            // 5
+            ch.call(5);
             if (i < argumentTypes.size()) {
+                // 6
+                ch.call(6);
                 argType = argumentTypes.get(i);
             }
             // Safety: if a type is null it means a signature with too few parameters
@@ -867,9 +880,13 @@ public class MethodResolutionLogic {
             // This should not happen but it also means that this signature is immediately
             // disqualified.
             if (paramTypeA == null) {
+                // 7
+                ch.call(7);
                 return false;
             }
             if (paramTypeB == null) {
+                // 8
+                ch.call(8);
                 return true;
             }
             // Widening primitive conversions have priority over boxing/unboxing conversions
@@ -882,10 +899,14 @@ public class MethodResolutionLogic {
             // This is what we check here.
             if (argType != null && paramTypeA.isPrimitive() == argType.isPrimitive()
                     && paramTypeB.isPrimitive() != argType.isPrimitive() && paramTypeA.isAssignableBy(argType)) {
+                // 9
+                ch.call(9);
                 return true;
             }
             if (argType != null && paramTypeB.isPrimitive() == argType.isPrimitive()
                     && paramTypeA.isPrimitive() != argType.isPrimitive() && paramTypeB.isAssignableBy(argType)) {
+                // 10
+                ch.call(10);
                 return false;
                 // if paramA and paramB are not the last parameters
                 // and the type of paramA or paramB (which are not more specific at this stage)
@@ -893,6 +914,8 @@ public class MethodResolutionLogic {
                 // then we have to consider others parameters before concluding
             }
             if ((i < numberOfArgs - 1) && (isJavaLangObject(paramTypeB) || (isJavaLangObject(paramTypeA)))) {
+                // 11
+                ch.call(11);
                 // consider others parameters
                 // but eventually mark the method A as more specific if the methodB has an
                 // argument of type java.lang.Object
@@ -903,27 +926,39 @@ public class MethodResolutionLogic {
             // as we would otherwise have
             // a situation where the declarations are ambiguous in the given context.
             {
+                // 12
+                ch.call(12);
                 boolean aAssignableFromB = paramTypeA.isAssignableBy(paramTypeB);
                 boolean bAssignableFromA = paramTypeB.isAssignableBy(paramTypeA);
                 if (bAssignableFromA && !aAssignableFromB) {
                     // A's parameter is more specific
+                    // 13
+                    ch.call(13);
                     return true;
                 }
                 if (aAssignableFromB && !bAssignableFromA) {
                     // B's parameter is more specific
+                    // 14
+                    ch.call(14);
                     return false;
                 }
             }
         }
         if (aVariadic && !bVariadic) {
             // if the last argument is an array then m1 is more specific
+            // 15
+            ch.call(15);
             return isLastArgArray;
         }
         if (!aVariadic && bVariadic) {
             // if the last argument is an array and m1 is not variadic then
             // it is not more specific
+            // 16
+            ch.call(16);
+
             return !isLastArgArray;
         }
+        ch.printResult("isMoreSpecific");
         return isMethodAMoreSpecific;
     }
 
