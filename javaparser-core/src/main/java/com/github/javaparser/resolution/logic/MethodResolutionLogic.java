@@ -83,7 +83,12 @@ public class MethodResolutionLogic {
      */
     private static boolean isApplicable(ResolvedMethodDeclaration methodDeclaration, String needleName,
             List<ResolvedType> needleArgumentTypes, TypeSolver typeSolver, boolean withWildcardTolerance) {
+        CCHelper ch = new CCHelper(IntStream.range(1, 23).toArray());
+        // 1
+        ch.call(1);
         if (!methodDeclaration.getName().equals(needleName)) {
+            // 2
+            ch.call(2);
             return false;
         }
         // The index of the final method parameter (on the method declaration).
@@ -95,15 +100,21 @@ public class MethodResolutionLogic {
                 && (countOfNeedleArgumentsPassed != countOfMethodParametersDeclared)) {
             // If it is not variadic, and the number of parameters/arguments are unequal --
             // this is not a match.
+            // 3
+            ch.call(3);
             return false;
         }
         if (methodIsDeclaredWithVariadicParameter) {
+            // 4
+            ch.call(4);
             if (countOfNeedleArgumentsPassed <= (countOfMethodParametersDeclared - 2)) {
                 // If it is variadic, and the number of arguments are short by **two or more**
                 // -- this is not a match.
                 // Note that omitting the variadic parameter is treated as an empty array
                 // (thus being short of only 1 argument is fine, but being short of 2 or more is
                 // not).
+                // 5
+                ch.call(5);
                 return false;
             }
             // If the method declaration we're considering has a variadic parameter,
@@ -112,20 +123,28 @@ public class MethodResolutionLogic {
             // group the remainder as an array
             ResolvedType expectedVariadicParameterType = methodDeclaration.getLastParam().getType();
             for (ResolvedTypeParameterDeclaration tp : methodDeclaration.getTypeParameters()) {
+                // 6
+                ch.call(6);
                 expectedVariadicParameterType = replaceTypeParam(expectedVariadicParameterType, tp, typeSolver);
             }
             if (countOfNeedleArgumentsPassed > countOfMethodParametersDeclared) {
+                // 7
+                ch.call(7);
                 // If it is variadic, and we have an "excess" of arguments, group the "trailing"
                 // arguments into an array.
                 // Confirm all of these grouped "trailing" arguments have the required type --
                 // if not, this is not a valid type. (Maybe this is also done later..?)
                 for (int variadicArgumentIndex = countOfMethodParametersDeclared; variadicArgumentIndex < countOfNeedleArgumentsPassed; variadicArgumentIndex++) {
+                    // 8
+                    ch.call(8);
                     ResolvedType currentArgumentType = needleArgumentTypes.get(variadicArgumentIndex);
                     boolean argumentIsAssignableToVariadicComponentType = expectedVariadicParameterType.asArrayType()
                             .getComponentType().isAssignableBy(currentArgumentType);
                     if (!argumentIsAssignableToVariadicComponentType) {
                         // If any of the arguments are not assignable to the expected variadic type,
                         // this is not a match.
+                        // 9
+                        ch.call(9);
                         return false;
                     }
                 }
@@ -141,15 +160,21 @@ public class MethodResolutionLogic {
         // At this point, therefore, the number of arguments must be equal -- if they're
         // not, then there is no match.
         if (countOfNeedleArgumentsPassedAfterGrouping != countOfMethodParametersDeclared) {
+            // 10
+            ch.call(10);
             return false;
         }
         Map<String, ResolvedType> matchedParameters = new HashMap<>();
         boolean needForWildCardTolerance = false;
         for (int i = 0; i < countOfMethodParametersDeclared; i++) {
+            // 11
+            ch.call(11);
             ResolvedType expectedDeclaredType = methodDeclaration.getParam(i).getType();
             ResolvedType actualArgumentType = needleArgumentTypes.get(i);
             if ((expectedDeclaredType.isTypeVariable() && !(expectedDeclaredType.isWildcard()))
                     && expectedDeclaredType.asTypeParameter().declaredOnMethod()) {
+                // 12
+                ch.call(12);
                 matchedParameters.put(expectedDeclaredType.asTypeParameter().getName(), actualArgumentType);
                 continue;
             }
@@ -162,6 +187,8 @@ public class MethodResolutionLogic {
             // even if an array of primitive type cannot be assigned to an array of Object
             if (methodDeclaration.getParam(i).isVariadic() && (i == countOfMethodParametersDeclared - 1)
                     && isArrayOfObject(expectedDeclaredType) && actualArgumentType.isArray()) {
+                // 13
+                ch.call(13);
                 continue;
             }
             boolean isAssignableWithoutSubstitution = expectedDeclaredType.isAssignableBy(actualArgumentType)
@@ -169,19 +196,29 @@ public class MethodResolutionLogic {
                             && convertToVariadicParameter(expectedDeclaredType).isAssignableBy(actualArgumentType));
             if (!isAssignableWithoutSubstitution && expectedDeclaredType.isReferenceType()
                     && actualArgumentType.isReferenceType()) {
+                // 14
+                ch.call(14);
                 isAssignableWithoutSubstitution = isAssignableMatchTypeParameters(
                         expectedDeclaredType.asReferenceType(), actualArgumentType.asReferenceType(),
                         matchedParameters);
             }
             if (!isAssignableWithoutSubstitution) {
+                // 15
+                ch.call(15);
                 List<ResolvedTypeParameterDeclaration> typeParameters = methodDeclaration.getTypeParameters();
                 typeParameters.addAll(methodDeclaration.declaringType().getTypeParameters());
                 for (ResolvedTypeParameterDeclaration tp : typeParameters) {
+                    // 16
+                    ch.call(16);
                     expectedDeclaredType = replaceTypeParam(expectedDeclaredType, tp, typeSolver);
                 }
                 if (!expectedDeclaredType.isAssignableBy(actualArgumentType)) {
+                    // 17
+                    ch.call(17);
                     if (actualArgumentType.isWildcard() && withWildcardTolerance
                             && !expectedDeclaredType.isPrimitive()) {
+                        // 18
+                        ch.call(18);
                         needForWildCardTolerance = true;
                         continue;
                     }
@@ -194,18 +231,29 @@ public class MethodResolutionLogic {
                     // we want to keep this method for future resolution
                     if (actualArgumentType.isConstraint() && withWildcardTolerance
                             && expectedDeclaredType.isPrimitive()) {
+                        // 19
+                        ch.call(19);
                         needForWildCardTolerance = true;
                         continue;
                     }
                     if (methodIsDeclaredWithVariadicParameter && i == countOfMethodParametersDeclared - 1) {
+                        // 20
+                        ch.call(20);
                         if (convertToVariadicParameter(expectedDeclaredType).isAssignableBy(actualArgumentType)) {
+                            // 21
+                            ch.call(21);
                             continue;
                         }
                     }
+                    // 22
+                    ch.call(22);
                     return false;
                 }
             }
         }
+        // 23
+        ch.call(23);
+        ch.printResult("isApplicable1");
         return !withWildcardTolerance || needForWildCardTolerance;
     }
 
