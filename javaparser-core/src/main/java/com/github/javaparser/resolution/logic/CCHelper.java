@@ -9,7 +9,7 @@ public class CCHelper {
 
     private boolean[] called;
 
-    private static final String FileName = "./coverage.txt";
+    private static final String FileName = "_coverage.txt";
 
     public CCHelper(int[] points) {
         ids = points;
@@ -25,9 +25,10 @@ public class CCHelper {
         }
     }
 
-    public void printResult() {
+    public void printResult(String filePrefix) {
         try {
-            File file = new File(FileName);
+            String fileName = "./" + filePrefix + FileName;
+            File file = new File(fileName);
             if (!file.exists()) {
                 file.createNewFile();
             }

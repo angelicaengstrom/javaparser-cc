@@ -748,7 +748,7 @@ public class MethodResolutionLogic {
                 }
             }
         }
-        ch.printResult();
+        ch.printResult("findMostApplicable");
         return SymbolReference.solved(winningCandidate);
     }
 
