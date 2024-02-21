@@ -676,6 +676,7 @@ public class MethodResolutionLogic {
         if (applicableMethods.isEmpty()) {
             // 2
             ch.call(2);
+            ch.printResult("findMostApplicable");
             return SymbolReference.unsolved();
         }
         // If there are multiple possible methods found, null arguments can help to
@@ -725,6 +726,7 @@ public class MethodResolutionLogic {
         if (applicableMethods.size() == 1) {
             // 11
             ch.call(11);
+            ch.printResult("findMostApplicable");
             return SymbolReference.solved(applicableMethods.get(0));
         }
         // Examine the applicable methods found, and evaluate each to determine the
@@ -791,6 +793,7 @@ public class MethodResolutionLogic {
                 } else {
                     // 23
                     ch.call(23);
+                    ch.printResult("findMostApplicable");
                     throw new MethodAmbiguityException("Ambiguous method call: cannot find a most applicable method: "
                             + winningCandidate + ", " + other);
                 }
