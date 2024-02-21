@@ -32,10 +32,9 @@ public class IsMoreSpecificTest extends MethodResolutionLogic {
 
     @Test
     public void testIfNotVariadicMethodDeclaration() {
-        String sample = "" +
+        String sample =
                 "public class Main {\n " +
                 "   void method1();{\n" +
-                "       "+
                 "   }\n" +
                 "   void method2(int i, String... string);{\n" +
                 "       i++;\n" +
@@ -49,10 +48,9 @@ public class IsMoreSpecificTest extends MethodResolutionLogic {
     }
     @Test
     public void testIfVariadicMethodDeclaration() {
-        String sample = "" +
+        String sample =
                 "public class Main {\n " +
                 "   void method1(String... string);{\n" +
-                "       "+
                 "   }\n" +
                 "   void method2(int i, String... string);{\n" +
                 "    \n" +
@@ -66,10 +64,9 @@ public class IsMoreSpecificTest extends MethodResolutionLogic {
     }
     @Test
     public void testIfBothAreVariadicMethodDeclaration() {
-        String sample = "" +
+        String sample =
                 "public class Main {\n " +
                 "   void method1(String... string);{\n" +
-                "       "+
                 "   }\n" +
                 "   void method2(String... string);{\n" +
                 "    \n" +
