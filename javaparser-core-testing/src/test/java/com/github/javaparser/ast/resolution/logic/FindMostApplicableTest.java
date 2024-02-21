@@ -50,7 +50,7 @@ public class FindMostApplicableTest extends MethodResolutionLogic {
     }
 
     @Test
-    public void testResolveTo() {
+    public void testSingleApplicableMethodFound() {
         String code = "public class Main {\n" +
                 "\n" +
                 "   void foo() {}"

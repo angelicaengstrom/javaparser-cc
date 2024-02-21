@@ -1016,57 +1016,89 @@ public class MethodResolutionLogic {
         throw new UnsupportedOperationException(typeDeclaration.getClass().getCanonicalName());
     }
 
+    static class Unit {
+    }
+
+    private static Optional<Unit> guardOnce(Optional<Unit> m, boolean b, Runnable f) {
+        if (b) {
+            m.map((_a) -> {
+                f.run();
+                return new Unit();
+            });
+            return Optional.empty();
+        } else {
+            return m;
+        }
+    };
+
+    private static Optional<Unit> guardOnceFlat(Optional<Unit> m, boolean b, Predicate<Unit> guard, Runnable f) {
+        if (b && guard.test(new Unit())) {
+            m.map((_a) -> {
+                f.run();
+                return new Unit();
+            });
+            return Optional.empty();
+        } else {
+            return m;
+        }
+
+    }
+
     protected static void inferTypes(ResolvedType source, ResolvedType target,
             Map<ResolvedTypeParameterDeclaration, ResolvedType> mappings) {
-        if (source.equals(target)) {
-            return;
-        }
-        if (source.isReferenceType() && target.isReferenceType()) {
-            ResolvedReferenceType sourceRefType = source.asReferenceType();
-            ResolvedReferenceType targetRefType = target.asReferenceType();
-            if (sourceRefType.getQualifiedName().equals(targetRefType.getQualifiedName())) {
-                if (!sourceRefType.isRawType() && !targetRefType.isRawType()) {
+        Optional<Unit> m = Optional.of(new Unit());
+
+        m = guardOnce(m, source.equals(target), () -> {
+        });
+
+        m = guardOnceFlat(m, source.isReferenceType() && target.isReferenceType(),
+                (_a) -> {
+
+                    ResolvedReferenceType sourceRefType = source.asReferenceType();
+                    ResolvedReferenceType targetRefType = target.asReferenceType();
+                    boolean res = true;
+                    res &= sourceRefType.getQualifiedName().equals(targetRefType.getQualifiedName());
+                    res &= !sourceRefType.isRawType() && !targetRefType.isRawType();
+
+                    return res;
+                },
+                () -> {
+                    ResolvedReferenceType sourceRefType = source.asReferenceType();
+                    ResolvedReferenceType targetRefType = target.asReferenceType();
                     for (int i = 0; i < sourceRefType.typeParametersValues().size(); i++) {
                         inferTypes(sourceRefType.typeParametersValues().get(i),
                                 targetRefType.typeParametersValues().get(i), mappings);
                     }
-                }
-            }
-            return;
-        }
-        if (source.isReferenceType() && target.isWildcard()) {
-            if (target.asWildcard().isBounded()) {
-                inferTypes(source, target.asWildcard().getBoundedType(), mappings);
-                return;
-            }
-            return;
-        }
-        if (source.isWildcard() && target.isWildcard()) {
-            return;
-        }
-        if (source.isReferenceType() && target.isTypeVariable()) {
+                    ;
+                });
+
+        m = guardOnce(m, source.isReferenceType() && target.isWildcard() && target.asWildcard().isBounded(), () -> {
+            inferTypes(source, target.asWildcard().getBoundedType(), mappings);
+        });
+
+        m = guardOnce(m, source.isWildcard() && target.isWildcard(), () -> {
+        });
+
+        m = guardOnce(m, source.isReferenceType() && target.isTypeVariable(), () -> {
             mappings.put(target.asTypeParameter(), source);
-            return;
-        }
-        if (source.isWildcard() && target.isReferenceType()) {
-            if (source.asWildcard().isBounded()) {
-                inferTypes(source.asWildcard().getBoundedType(), target, mappings);
-            }
-            return;
-        }
-        if (source.isWildcard() && target.isTypeVariable()) {
+        });
+
+        m = guardOnce(m, source.isWildcard() && target.isReferenceType() && (source.asWildcard().isBounded()), () -> {
+            inferTypes(source.asWildcard().getBoundedType(), target, mappings);
+        });
+
+        m = guardOnce(m, source.isWildcard() && target.isTypeVariable(), () -> {
             mappings.put(target.asTypeParameter(), source);
-            return;
-        }
-        if (source.isTypeVariable() && target.isTypeVariable()) {
+        });
+
+        m = guardOnce(m, source.isTypeVariable() && target.isTypeVariable(), () -> {
             mappings.put(target.asTypeParameter(), source);
-            return;
-        }
-        if (source.isPrimitive() || target.isPrimitive()) {
-            return;
-        }
-        if (source.isNull()) {
-            return;
-        }
+        });
+
+        m = guardOnce(m, source.isPrimitive() || target.isPrimitive(), () -> {
+        });
+
+        m = guardOnce(m, source.isNull(), () -> {
+        });
     }
 }
