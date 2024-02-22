@@ -8,10 +8,14 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.IntStream;
 
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 
 import com.github.javaparser.resolution.declarations.ResolvedMethodDeclaration;
+import com.github.javaparser.resolution.logic.CCHelper;
 import com.github.javaparser.resolution.logic.MethodResolutionLogic;
 import com.github.javaparser.resolution.model.SymbolReference;
 import com.github.javaparser.resolution.types.ResolvedPrimitiveType;
@@ -30,128 +34,150 @@ import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.ast.body.MethodDeclaration;
 
 public class FindMostApplicableTest extends MethodResolutionLogic {
-    protected JavaParser createParserWithResolver(TypeSolver typeSolver) {
-        return new JavaParser(new ParserConfiguration().setSymbolResolver(symbolResolver(typeSolver)));
-    }
+        protected JavaParser createParserWithResolver(TypeSolver typeSolver) {
+                return new JavaParser(new ParserConfiguration().setSymbolResolver(symbolResolver(typeSolver)));
+        }
 
-    protected SymbolResolver symbolResolver(TypeSolver typeSolver) {
-        return new JavaSymbolSolver(typeSolver);
-    }
+        protected SymbolResolver symbolResolver(TypeSolver typeSolver) {
+                return new JavaSymbolSolver(typeSolver);
+        }
 
-    /**
-     * Test case asserting that an {@link UnsolvedSymbolException} is thrown an
-     * empty list of candidate methods is passed to the method resolution logic.
-     */
-    @Test
-    public void testNoApplicableMethodsFoundThrowsException() {
-        List<ResolvedMethodDeclaration> candidateSolvedMethods = new ArrayList<>();
-        List<ResolvedType> argumentsTypes = new ArrayList<>();
-        TypeSolver typeSolver = new ReflectionTypeSolver();
+        private static CCHelper ch;
 
-        SymbolReference<ResolvedMethodDeclaration> applicableMethod = findMostApplicable(candidateSolvedMethods, "",
-                argumentsTypes, typeSolver, false);
+        @BeforeAll
+        public static void setUp() {
+                ch = new CCHelper(IntStream.range(1, 24).toArray());
+        }
 
-        assertThrows(UnsolvedSymbolException.class, () -> applicableMethod.getCorrespondingDeclaration());
-    }
+        @AfterAll
+        public static void tearDown() {
+                ch.printResult("FindMostApplicableTest");
+        }
 
-    /**
-     * Test case to verify behavior when a single applicable method is passed as an
-     * argument.
-     */
-    @Test
-    public void testSingleApplicableMethodFound() {
-        String code = "public class Main {\n" +
-                "\n" +
-                "   void foo() {}"
-                + "}";
+        /**
+         * Test case asserting that an {@link UnsolvedSymbolException} is thrown an
+         * empty list of candidate methods is passed to the method resolution logic.
+         */
+        @Test
+        public void testNoApplicableMethodsFoundThrowsException() {
+                List<ResolvedMethodDeclaration> candidateSolvedMethods = new ArrayList<>();
+                List<ResolvedType> argumentsTypes = new ArrayList<>();
+                TypeSolver typeSolver = new ReflectionTypeSolver();
 
-        CompilationUnit cu = JavaParserAdapter.of(createParserWithResolver(new ReflectionTypeSolver())).parse(code);
+                SymbolReference<ResolvedMethodDeclaration> applicableMethod = findMostApplicable(candidateSolvedMethods,
+                                "",
+                                argumentsTypes, typeSolver, false, ch);
 
-        // Retrieving the resolved method declaration from the parsed code
-        ResolvedMethodDeclaration expected = cu.findAll(MethodDeclaration.class).get(0).resolve();
+                assertThrows(UnsolvedSymbolException.class, () -> applicableMethod.getCorrespondingDeclaration());
+        }
 
-        // Creating a list containing only the expected method declaration
-        List<ResolvedMethodDeclaration> candidateSolvedMethods = new ArrayList<>(Arrays.asList(expected));
+        /**
+         * Test case to verify behavior when a single applicable method is passed as an
+         * argument.
+         */
+        @Test
+        public void testSingleApplicableMethodFound() {
+                String code = "public class Main {\n" +
+                                "\n" +
+                                "   void foo() {}"
+                                + "}";
 
-        // Finding the most applicable method
-        SymbolReference<ResolvedMethodDeclaration> applicableMethod = findMostApplicable(candidateSolvedMethods, "foo",
-                Collections.emptyList(), new ReflectionTypeSolver(), false);
+                CompilationUnit cu = JavaParserAdapter.of(createParserWithResolver(new ReflectionTypeSolver()))
+                                .parse(code);
 
-        // Retrieving the actual resolved method declaration
-        ResolvedMethodDeclaration actual = applicableMethod.getCorrespondingDeclaration();
+                // Retrieving the resolved method declaration from the parsed code
+                ResolvedMethodDeclaration expected = cu.findAll(MethodDeclaration.class).get(0).resolve();
 
-        assertEquals(expected, actual);
-    }
+                // Creating a list containing only the expected method declaration
+                List<ResolvedMethodDeclaration> candidateSolvedMethods = new ArrayList<>(Arrays.asList(expected));
 
-    /**
-     * Test to verify the return type of an overloaded method with an integer
-     * argument.
-     */
-    @Test
-    public void testReturnTypeOfOverloadedMethodWithIntArgument() {
-        String code = "public class Main {\n" +
-                "\n" +
-                "   void foo() {}" +
-                "  int foo(int a) {" +
-                " return a;" +
-                "}" +
-                "  boolean foo(boolean b) {" +
-                " return b;" +
-                "}" +
-                "}";
+                // Finding the most applicable method
+                SymbolReference<ResolvedMethodDeclaration> applicableMethod = findMostApplicable(candidateSolvedMethods,
+                                "foo",
+                                Collections.emptyList(), new ReflectionTypeSolver(), false, ch);
 
-        CompilationUnit cu = JavaParserAdapter.of(createParserWithResolver(new ReflectionTypeSolver())).parse(code);
+                // Retrieving the actual resolved method declaration
+                ResolvedMethodDeclaration actual = applicableMethod.getCorrespondingDeclaration();
 
-        List<MethodDeclaration> methodDeclarations = cu.findAll(MethodDeclaration.class);
+                assertEquals(expected, actual);
+        }
 
-        // Creating a list containing the type of argument expected (in this case, int)
-        List<ResolvedType> argumentsTypes = new ArrayList<>(
-                Arrays.asList(ResolvedPrimitiveType.INT));
+        /**
+         * Test to verify the return type of an overloaded method with an integer
+         * argument.
+         */
+        @Test
+        public void testReturnTypeOfOverloadedMethodWithIntArgument() {
+                String code = "public class Main {\n" +
+                                "\n" +
+                                "   void foo() {}" +
+                                "  int foo(int a) {" +
+                                " return a;" +
+                                "}" +
+                                "  boolean foo(boolean b) {" +
+                                " return b;" +
+                                "}" +
+                                "}";
 
-        // Resolving each method declaration and collecting them into a list
-        List<ResolvedMethodDeclaration> candidateSolvedMethods = methodDeclarations.stream().map(m -> m.resolve())
-                .collect(Collectors.toList());
+                CompilationUnit cu = JavaParserAdapter.of(createParserWithResolver(new ReflectionTypeSolver()))
+                                .parse(code);
 
-        SymbolReference<ResolvedMethodDeclaration> applicableMethod = findMostApplicable(candidateSolvedMethods, "foo",
-                argumentsTypes, new ReflectionTypeSolver(), false);
+                List<MethodDeclaration> methodDeclarations = cu.findAll(MethodDeclaration.class);
 
-        // Retrieving the actual return type of the resolved method declaration
-        ResolvedType actual = applicableMethod.getCorrespondingDeclaration().getReturnType();
-        ResolvedType expected = ResolvedPrimitiveType.INT;
+                // Creating a list containing the type of argument expected (in this case, int)
+                List<ResolvedType> argumentsTypes = new ArrayList<>(
+                                Arrays.asList(ResolvedPrimitiveType.INT));
 
-        // Asserting that the expected return type matches the actual return type
-        assertEquals(expected, actual);
-    }
+                // Resolving each method declaration and collecting them into a list
+                List<ResolvedMethodDeclaration> candidateSolvedMethods = methodDeclarations.stream()
+                                .map(m -> m.resolve())
+                                .collect(Collectors.toList());
 
-    /**
-     * Tests that attempting to match a method by name with incorrect argument types
-     * throws an {@link UnsolvedSymbolException} when an attempt is made to get the
-     * corresponding declaration.
-     * This test case ensures that the method resolution process correctly
-     * identifies when no available method matches
-     * the given method name and argument types combination, and throws an exception
-     * to signal the unresolved method.
-     */
-    @Test
-    public void testMatchingMethodNameWithWrongArgumentThrowsException() {
-        String code = "public class Main {\n" +
-                "\n" +
-                "   void foo() {}" +
-                "}";
-        CompilationUnit cu = JavaParserAdapter.of(createParserWithResolver(new ReflectionTypeSolver())).parse(code);
+                SymbolReference<ResolvedMethodDeclaration> applicableMethod = findMostApplicable(candidateSolvedMethods,
+                                "foo",
+                                argumentsTypes, new ReflectionTypeSolver(), false, ch);
 
-        List<MethodDeclaration> methodDeclarations = cu.findAll(MethodDeclaration.class); // Add methods to the list
-        List<ResolvedMethodDeclaration> candidateSolvedMethods = methodDeclarations.stream().map(m -> m.resolve())
-                .collect(Collectors.toList());
+                // Retrieving the actual return type of the resolved method declaration
+                ResolvedType actual = applicableMethod.getCorrespondingDeclaration().getReturnType();
+                ResolvedType expected = ResolvedPrimitiveType.INT;
 
-        List<ResolvedType> argumentsTypes = new ArrayList<>(
-                Arrays.asList(ResolvedPrimitiveType.INT));
+                // Asserting that the expected return type matches the actual return type
+                assertEquals(expected, actual);
+        }
 
-        SymbolReference<ResolvedMethodDeclaration> applicableMethod = findMostApplicable(candidateSolvedMethods, "foo",
-                argumentsTypes,
-                new ReflectionTypeSolver(), false);
+        /**
+         * Tests that attempting to match a method by name with incorrect argument types
+         * throws an {@link UnsolvedSymbolException} when an attempt is made to get the
+         * corresponding declaration.
+         * This test case ensures that the method resolution process correctly
+         * identifies when no available method matches
+         * the given method name and argument types combination, and throws an exception
+         * to signal the unresolved method.
+         */
+        @Test
+        public void testMatchingMethodNameWithWrongArgumentThrowsException() {
+                String code = "public class Main {\n" +
+                                "\n" +
+                                "   void foo() {}" +
+                                "}";
+                CompilationUnit cu = JavaParserAdapter.of(createParserWithResolver(new ReflectionTypeSolver()))
+                                .parse(code);
 
-        assertThrows(UnsolvedSymbolException.class, () -> applicableMethod.getCorrespondingDeclaration());
-    }
+                List<MethodDeclaration> methodDeclarations = cu.findAll(MethodDeclaration.class); // Add methods to the
+                                                                                                  // list
+                List<ResolvedMethodDeclaration> candidateSolvedMethods = methodDeclarations.stream()
+                                .map(m -> m.resolve())
+                                .collect(Collectors.toList());
+
+                List<ResolvedType> argumentsTypes = new ArrayList<>(
+                                Arrays.asList(ResolvedPrimitiveType.INT));
+
+                SymbolReference<ResolvedMethodDeclaration> applicableMethod = findMostApplicable(candidateSolvedMethods,
+                                "foo",
+                                argumentsTypes,
+                                new ReflectionTypeSolver(), false, ch);
+
+                assertThrows(UnsolvedSymbolException.class, () -> applicableMethod.getCorrespondingDeclaration());
+        }
 
 }

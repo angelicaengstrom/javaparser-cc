@@ -25,6 +25,17 @@ public class CCHelper {
         }
     }
 
+    public String getCoveragePercentage() {
+        int total = ids.length;
+        int covered = 0;
+        for (int i = 0; i < ids.length; i++) {
+            if (called[i]) {
+                covered++;
+            }
+        }
+        return String.format("Total: %d Covered: %d Percentage: %.2f", total, covered, (double) covered / total * 100);
+    }
+
     public void printResult(String filePrefix) {
         try {
             String fileName = "./" + filePrefix + FileName;
@@ -38,6 +49,8 @@ public class CCHelper {
                 result += String.format("id: %d Covered: %b\n", ids[i], called[i]);
             }
             fw.append(result);
+            fw.append("\n-----------------------------------\n");
+            fw.append(getCoveragePercentage());
             fw.close();
         } catch (Exception e) {
             System.out.println(e);
