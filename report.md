@@ -242,7 +242,6 @@ The self-assessment was unanimous. Over time, we have seen further improvements 
 - [x] The team members are available for assignment to other teams.
 - [x] No further effort is being put in by the team to complete the mission.
 
-## Overall experience
 
 
 Is there something special you want to mention here?
