@@ -83,13 +83,13 @@ public class MethodResolutionLogic {
      */
     private static boolean isApplicable(ResolvedMethodDeclaration methodDeclaration, String needleName,
             List<ResolvedType> needleArgumentTypes, TypeSolver typeSolver, boolean withWildcardTolerance) {
-        CCHelper ch = new CCHelper(IntStream.range(1, 13).toArray());
+        CCHelper ch = new CCHelper(IntStream.range(1, 12).toArray());
         // 1
         ch.call(1);
         if (!methodDeclaration.getName().equals(needleName)) {
             // 2
             ch.call(2);
-            ch.printResult("isApplicable1");
+            ch.printResult("IsApplicable1Test");
             return false;
         }
         // The index of the final method parameter (on the method declaration).
@@ -99,17 +99,17 @@ public class MethodResolutionLogic {
         boolean methodIsDeclaredWithVariadicParameter = methodDeclaration.hasVariadicParameter();
 
         if (methodIsDeclaredWithVariadicParameter) {
-            // 4
-            ch.call(4);
+            // 3
+            ch.call(3);
 
             ResolvedType expectedVariadicParameterType = methodDeclaration.getLastParam().getType();
 
             // If the method is not applicable as a variadic but it was declared with variadic
             // parameter, then there is no match.
             if (!methodIsApplicableAsVariadic(methodDeclaration, typeSolver, needleArgumentTypes, countOfNeedleArgumentsPassed, countOfMethodParametersDeclared, expectedVariadicParameterType)) {
-                // 5
-                ch.call(5);
-                ch.printResult("isApplicable1");
+                // 4
+                ch.call(4);
+                ch.printResult("IsApplicable1Test");
                 return false;
             }
 
@@ -127,42 +127,42 @@ public class MethodResolutionLogic {
         if (countOfNeedleArgumentsPassed != countOfMethodParametersDeclared) {
             // If the number of parameters/arguments are unequal --
             // this is not a match.
-            // 6
-            ch.call(6);
-            ch.printResult("isApplicable1");
+            // 5
+            ch.call(5);
+            ch.printResult("IsApplicable1Test");
             return false;
         }
         Map<String, ResolvedType> matchedParameters = new HashMap<>();
         boolean needForWildCardTolerance = false;
         for (int i = 0; i < countOfMethodParametersDeclared; i++) {
-            // 7
-            ch.call(7);
+            // 6
+            ch.call(6);
             ResolvedType actualArgumentType = needleArgumentTypes.get(i);
             ResolvedParameterDeclaration parameterDeclaration = methodDeclaration.getParam(i);
             boolean isLastIndex = (i == countOfMethodParametersDeclared - 1);
             if (parameterIsApplicableWithoutSubstitution(parameterDeclaration, actualArgumentType, matchedParameters, isLastIndex)) {
-                // 8
-                ch.call(8);
+                // 7
+                ch.call(7);
                 continue;
             }
             if (!parameterIsApplicableWithSubstitution(methodDeclaration, parameterDeclaration.getType(), typeSolver, actualArgumentType)) {
-                // 9
-                ch.call(9);
+                // 8
+                ch.call(8);
                 if (isNeedForWildCardTolerance(parameterDeclaration.getType(), actualArgumentType, withWildcardTolerance)) {
-                    // 10
-                    ch.call(10);
+                    // 9
+                    ch.call(9);
                     needForWildCardTolerance = true;
                 } else if (!conversionToVariadicParameterIsApplicable(methodIsDeclaredWithVariadicParameter, isLastIndex, parameterDeclaration.getType(), actualArgumentType)) {
-                    // 11
-                    ch.call(11);
-                    ch.printResult("isApplicable1");
+                    // 10
+                    ch.call(10);
+                    ch.printResult("IsApplicable1Test");
                     return false;
                 }
             }
         }
-        // 12
-        ch.call(12);
-        ch.printResult("isApplicable1");
+        // 11
+        ch.call(11);
+        ch.printResult("IsApplicable1Test");
         return !withWildcardTolerance || needForWildCardTolerance;
     }
 
@@ -1018,7 +1018,7 @@ public class MethodResolutionLogic {
 
             return !isLastArgArray;
         }
-        ch.printResult("isMoreSpecific");
+        ch.printResult("IsMoreSpecificTest");
         return isMethodAMoreSpecific;
     }
 
@@ -1145,6 +1145,7 @@ public class MethodResolutionLogic {
     protected static void inferTypes(ResolvedType source, ResolvedType target,
             Map<ResolvedTypeParameterDeclaration, ResolvedType> mappings) {
         Optional<Unit> m = Optional.of(new Unit());
+        CCHelper ch = new CCHelper(IntStream.range(1, 17).toArray());
 
         m = guardOnce(m, source.equals(target), () -> {
         });
