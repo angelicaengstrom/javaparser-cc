@@ -1145,7 +1145,7 @@ public class MethodResolutionLogic {
     protected static void inferTypes(ResolvedType source, ResolvedType target,
             Map<ResolvedTypeParameterDeclaration, ResolvedType> mappings) {
         Optional<Unit> m = Optional.of(new Unit());
-        CCHelper ch = new CCHelper(IntStream.range(1, 17).toArray());
+        CCHelper ch = new CCHelper(IntStream.range(1, 2).toArray());
 
         m = guardOnce(m, source.equals(target), () -> {
         });
@@ -1199,5 +1199,8 @@ public class MethodResolutionLogic {
 
         m = guardOnce(m, source.isNull(), () -> {
         });
+        ch.call(1);
+
+        ch.printResult("infer_types");
     }
 }

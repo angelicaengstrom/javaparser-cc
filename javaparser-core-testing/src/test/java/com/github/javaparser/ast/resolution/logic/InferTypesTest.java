@@ -55,6 +55,9 @@ class InferTypesTest extends MethodResolutionLogic {
         return resRefType;
     }
 
+    /*
+     * Test if primitive types works.
+     */
     @Test
     public void testPrimitive() {
         ResolvedType src = ResolvedPrimitiveType.BOOLEAN;
@@ -65,6 +68,10 @@ class InferTypesTest extends MethodResolutionLogic {
         assertTrue(mappings.size() == 0);
     }
 
+
+    /*
+     * Nothing should be done if the source and target is the same.
+     */
     @Test
     public void testSame(){
         ResolvedType t = getRefType();
@@ -74,6 +81,9 @@ class InferTypesTest extends MethodResolutionLogic {
         assertTrue(mappings.size() == 0);
     }
 
+    /*
+     * Type variable should be resolved to reference type.
+     */
     @Test
     public void testTypeVariableReference(){
         ResolvedType rt = getRefType();
@@ -84,6 +94,9 @@ class InferTypesTest extends MethodResolutionLogic {
         assertTrue(mappings.size() == 1);
     }
 
+    /*
+     * Spread resolved type variables to unresolved one.
+     */
     @Test
     public void testTypeVariable(){
         ResolvedTypeVariable rtv = new ResolvedTypeVariable(ResolvedTypeParameterDeclaration.onType("A", "foo.Bar", Collections.emptyList()));
