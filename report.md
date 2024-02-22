@@ -192,6 +192,8 @@ Celina Tjärnström: 3
 
 ## Self-assessment: Way of working
 
+The self-assessment was unanimous. Over time, we have seen further improvements in our way of communicating with each other. Our way of continually tuning our use of practices and tools has some potential for improvement.
+
 ### Seeded
 
 - [x] The team mission has been defined in terms of the opportunities and outcomes.
