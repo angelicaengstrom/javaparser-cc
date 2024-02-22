@@ -244,7 +244,6 @@ The self-assessment was unanimous. Over time, we have seen further improvements 
 
 ## Overall experience
 
-What are your main take-aways from this project? What did you learn?
 
 Is there something special you want to mention here?
 
