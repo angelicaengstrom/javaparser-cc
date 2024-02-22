@@ -139,6 +139,7 @@ John Söderholm: I have used a couple of code coverage tools in Java and Python 
 
 Angelica Engström: It was pretty hard to integrate it with our build process since there wasn’t alot of documentation to build the project with our IDE.
 
+Tianxing Wu: The experience is not very pleasant as junit is not very smart to only run specific tests or run things in parallel so it is very slow. The maven cli is also very painful to work with. I have used Hspec for test with Haskell code and it works very well out of the box and is far more intuitive.
 ### Your own coverage tool
 
 Show a patch (or link to a branch) that shows the instrumented code to
