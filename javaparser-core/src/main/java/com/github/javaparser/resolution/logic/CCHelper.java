@@ -33,7 +33,7 @@ public class CCHelper {
                 covered++;
             }
         }
-        return String.format("Total: %d Covered: %d Percentage: %.2f", total, covered, (double) covered / total * 100);
+        return String.format("Total: %d Covered: %d Percentage: %.2f \n", total, covered, (double) covered / total * 100);
     }
 
     public void printResult(String filePrefix) {
