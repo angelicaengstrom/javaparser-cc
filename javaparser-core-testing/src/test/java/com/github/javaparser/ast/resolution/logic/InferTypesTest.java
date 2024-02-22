@@ -1,12 +1,20 @@
 package com.github.javaparser.ast.resolution.logic;
 
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import java.nio.file.Path;
+import java.util.*;
 
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
+import com.github.javaparser.resolution.MethodUsage;
+import com.github.javaparser.resolution.declarations.ResolvedMethodDeclaration;
+import com.github.javaparser.resolution.types.ResolvedReferenceType;
+import com.github.javaparser.symbolsolver.javaparsermodel.declarations.JavaParserClassDeclaration;
+import com.github.javaparser.symbolsolver.reflectionmodel.ReflectionFactory;
+import com.github.javaparser.symbolsolver.reflectionmodel.ReflectionMethodDeclaration;
+import com.github.javaparser.symbolsolver.resolution.typesolvers.CombinedTypeSolver;
+import com.github.javaparser.symbolsolver.resolution.typesolvers.JavaParserTypeSolver;
+import com.google.common.collect.ImmutableList;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
 import com.github.javaparser.JavaParser;
@@ -24,10 +32,24 @@ import com.github.javaparser.resolution.types.ResolvedTypeVariable;
 import com.github.javaparser.symbolsolver.JavaSymbolSolver;
 import com.github.javaparser.symbolsolver.resolution.typesolvers.ReflectionTypeSolver;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 class InferTypesTest extends MethodResolutionLogic {
     protected JavaParser createParserWithResolver(TypeSolver typeSolver) {
         return new JavaParser(new ParserConfiguration().setSymbolResolver(symbolResolver(typeSolver)));
     }
+
+    public static class TestClass {
+        public boolean testMethod() {
+            return true;
+        }
+
+        public boolean testMethodWithArgs(boolean x) {
+            return true;
+        }
+    }
+
+    public static boolean[] flags = new boolean[25];
 
     protected SymbolResolver symbolResolver(TypeSolver typeSolver) {
         return new JavaSymbolSolver(typeSolver);
@@ -92,6 +114,59 @@ class InferTypesTest extends MethodResolutionLogic {
 
         inferTypes(rtv, rtv2, mappings);
         assertTrue(mappings.size() == 1);
+    }
+
+    @Test
+    public void testIsApplicableFalseWhenDifferentNames() throws NoSuchMethodException {
+        TypeSolver rts = new ReflectionTypeSolver();
+
+        ResolvedMethodDeclaration m = new ReflectionMethodDeclaration(TestClass.class.getMethod("testMethod"), rts);
+        MethodUsage mu = new MethodUsage(m);
+
+        List<ResolvedType> lst = new ArrayList<>();
+
+        String needle = "notTheTestMethod";
+
+        assertFalse(isApplicable(mu, needle, lst, rts));
+    }
+
+    @Test
+    public void testIsApplicableFalseWhenDifferentArgs() throws NoSuchMethodException {
+        TypeSolver rts = new ReflectionTypeSolver();
+
+        ResolvedMethodDeclaration m = new ReflectionMethodDeclaration(TestClass.class.getMethod("testMethodWithArgs", boolean.class), rts);
+        MethodUsage mu = new MethodUsage(m);
+
+        List<ResolvedType> lst = new ArrayList<>();
+        lst.add(ResolvedPrimitiveType.INT);
+
+        String needle = "testMethodWithArgs";
+
+        assertFalse(isApplicable(mu, needle, lst, rts));
+    }
+
+    @BeforeAll
+    public static void setupFlags () {
+        flags = new boolean[25];
+    }
+
+    @AfterAll
+    public static void checkFlags() {
+        int index = 0;
+        int numReached = 0;
+        for (boolean flag : flags) {
+            if (flag){
+                System.out.println("Branch reached:" + index);
+                numReached++;
+            } else {
+                System.out.println("Branch not reached: " + index);
+            }
+            index++;
+        }
+
+        float cov = (float) numReached / (index+1);
+
+        System.out.println("Total coverage: " + cov);
     }
 
 }
