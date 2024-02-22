@@ -244,5 +244,4 @@ The self-assessment was unanimous. Over time, we have seen further improvements 
 
 
 
-Is there something special you want to mention here?
 
