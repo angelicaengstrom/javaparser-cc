@@ -100,7 +100,7 @@ Plan for refactoring complex code:
 
 Tianxing Wu: Use Maybe functor (In java it is called Optional) to eliminate if statements.
 
-John Söderholm: Extracting complex if-statements into distinct functions.
+John Söderholm: Extracting complex if-statements into distinct functions. This would reduce the cyclomatic complexity significantly. One of these functions would have the responsibility to investigate and handle possible null parameters in the list of input methods.
 
 Angelica Engström: Extracting complex branches into distinct functions or classes. Using design patterns?
 
